@@ -675,6 +675,8 @@ var lightRotSpeed = 0.05;
 
 var rotCameraX = [0.0, 0.0, 0.0, 0.0];
 var rotCameraY = [0.0, 0.0, 0.0, 0.0];
+var rotWildCamX = [0.0, 0.0, 0.0, 0.0];
+var rotWildCamY = [0.0, 0.0, 0.0, 0.0];
 var rotCameraZ = 0.0;
 var xDirection = 1;
 var yDirection = 1;
@@ -689,13 +691,14 @@ var lookAt = [0.0, 1.0, 0.0];
 var up = [0.0, 1.0, 0.0];
 var cameraMatrix = [eye, lookAt, up];
 var zoomLevel = 100;
-var zoom = [0.80, 0.15, 0.9, 0.5];
+var zoom = [0.80, 0.15, 0.9, 0.75];
 var selectedCam = 0; 
-var camera1 = [0.0, 0.0, -16.0]; 
-var camera2 = [1.0, 10.0, -3.0];
-var camera3 = [20.0, 0.0, -64.0];
-var camera4 = [-0.0, 4.0, 16.0];
+var camera1 = [0.0, 0.0, 0.0]; 
+var camera2 = [0.0, 1.0, 0.0];
+var camera3 = [0.0, 4.0, 0.0];
+var camera4 = [0.0, 8.0, 0.0];
 var cameras = [camera1, camera2, camera3, camera4];
+var perspectives = [30, 45, 90, 135];
 
 var galvanizedTexture;
 
@@ -2357,7 +2360,7 @@ function SetMaxSproingies(max) {
 	{
 	    fov *= (gl.viewportHeight / gl.viewportWidth);
 	}
-	mat4.perspective(fov, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0, pMatrix);
+	mat4.perspective(perspectives[selectedCam], gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0, pMatrix);
 
 	var mvMatrix = mat4.create();
 	mat4.identity(mvMatrix);
@@ -2365,8 +2368,8 @@ function SetMaxSproingies(max) {
     eye[2] = 100 * (1 - zoom[selectedCam]) + 2;
     mvMatrix = mat4.lookAt(eye, lookAt, up);
 	
-	mat4.rotate(mvMatrix, rotCameraX[selectedCam] * DegToRad, [1.0, 0.0, 0.0]);
-	mat4.rotate(mvMatrix, rotCameraY[selectedCam] * DegToRad, [0.0, 1.0, 0.0]);
+	mat4.rotate(mvMatrix, (rotCameraX[selectedCam]) * DegToRad, [1.0, 0.0, 0.0]);
+	mat4.rotate(mvMatrix, (rotCameraY[selectedCam] + rotWildCamY[selectedCam]) * DegToRad, [0.0, 1.0, 0.0]);
 
 	var worldMatrix = mat4.create(mvMatrix);
 
@@ -2585,6 +2588,7 @@ function animateHero(hero, sproingieMatrix) {
   }
   
   function levelWon(){
+  lvlWin = true;
 	gameLevel ++;
 	totalScore = levelScore + totalScore;
 	levelScore = 10000 * gameLevel/2;	
@@ -2854,15 +2858,31 @@ function animateHero(hero, sproingieMatrix) {
   function wildCamera()
   {
   if(sproingieList[0].m_X != 1){
-        if(rotCameraY[selectedCam] > 44.9 || rotCameraY[selectedCam] < -134.9) yDirection *= -1;
-        if(rotCameraX[selectedCam] > 44.9 || rotCameraX[selectedCam] < -44.9) xDirection *= -1;
+        if(rotWildCamY[selectedCam] + rotCameraY > 44.9 || rotWildCamY[selectedCam] + rotCameraY[selectedCam] < -134.9) { yDirection *= -1; } 
+        if(rotCameraX[selectedCam] > 44.9 || rotCameraX[selectedCam] < -44.9) { xDirection *= -1; alert(eye[0] + " " + eye[1] + " " + eye[2]);}
         if(zoom[selectedCam] > 0.99)  zoomDirection = -1;
         if(zoom[selectedCam] < 0.8) zoomDirection = 1;
-            //rotCameraX[selectedCam] += 0.5 * xDirection;
-            rotCameraY[selectedCam] += 0.3 * yDirection;
+            rotCameraX[selectedCam] += 0.5 * xDirection;
+            rotWildCamY[selectedCam] += 0.3 * yDirection;
             zoom[selectedCam] += 0.001 * zoomDirection;
         }
-        else lvlWin = false;
+        else 
+        { 
+            lvlWin = false; 
+            resetCameras(); 
+        }
+    }
+    
+    function resetCameras()
+    {
+        camera1 = [0.0, 0.0, 0.0]; 
+        camera2 = [0.0, 1.0, 0.0];
+        camera3 = [0.0, 4.0, 0.0];
+        camera4 = [0.0, 8.0, 0.0];
+        cameras = [camera1, camera2, camera3, camera4];
+        eye = cameras[selectedCam];
+        eye[2] = 100 * (1 - zoom[selectedCam]) + 2;
+        mvMatrix = mat4.lookAt(eye, lookAt, up);
     }
 
   

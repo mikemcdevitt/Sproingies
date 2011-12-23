@@ -704,6 +704,8 @@ var zoomLevel = 100;
 var zoom = [0.80, 0.15, 0.9, 0.5, 0.9];
 var selectedCam = 0;
 var oldcam = 0;
+var xDir = -1;
+var yDir = -1;
 var winZoom = false;
 var winTime = 0;
 var camera1 = [0.0, 0.0, -16.0];
@@ -2438,6 +2440,8 @@ function setScore() {
 
 function levelWon() {
 
+	xDir *= -1;
+	yDir *= -1;
 
 	levelScore = 10000 * gameLevel / 2;
 	totalScore = levelScore + totalScore;
@@ -2518,11 +2522,11 @@ function animate() {
 			winTime++;
 			if (zoom[selectedCam] <= 0.99 && zoom[selectedCam] >= 0.01)
 			zoom[selectedCam] += 0.0001;
-			rotCameraX[selectedCam] += 0.1;
-			rotCameraY[selectedCam] -= 0.1;
+			rotCameraX[selectedCam] += 0.1 * xDir;
+			rotCameraY[selectedCam] -= 0.1 * yDir;
 			lookAt = [sproingieList[0].m_X, sproingieList[0].m_Y, sproingieList[0].m_Z];
 		
-			if (winTime == 500)
+			if (winTime == 200)
 			{
 				nextLevel();
 			}
